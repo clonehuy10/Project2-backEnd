@@ -25,10 +25,10 @@ const requireToken = passport.authenticate('bearer', { session: false })
 // instantiate a router (mini app that only handles routes)
 const router = express.Router()
 
-// Index
-router.get('/showall', (req, res, next) => {
+// INDEX
+router.get('/show-all', (req, res, next) => {
   User.find()
-    .then(users => res.status(200).json({ users }))
+    .then(users => res.status(201).json({ users }))
 })
 
 // SIGN UP
