@@ -39,6 +39,8 @@ router.post('/comments', requireToken, (req, res, next) => {
   const threadId = commentData.threadId
 
   Thread.findById(threadId)
+    .populate('owner')
+    .populate('comments.owner')
     .then(handle404)
     .then(thread => {
       thread.comments.push(commentData)

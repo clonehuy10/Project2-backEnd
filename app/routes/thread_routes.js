@@ -31,6 +31,7 @@ const router = express.Router()
 router.get('/show-all-thread', (req, res, next) => {
   Thread.find()
     .populate('owner')
+    .populate('comments.owner')
     .then(threads => res.status(201).json({ threads }))
     .catch(next)
 })
@@ -39,6 +40,8 @@ router.get('/show-all-thread', (req, res, next) => {
 // GET /threads
 router.get('/threads', requireToken, (req, res, next) => {
   Thread.find({ owner: req.params.id })
+    .populate('owner')
+    .populate('comments.owner')
     .then(threads => {
       // `threads` will be an array of Mongoose documents
       // we want to convert each one to a POJO, so we use `.map` to
@@ -53,9 +56,11 @@ router.get('/threads', requireToken, (req, res, next) => {
 
 // SHOW
 // GET /threads/5a7db6c74d55bc51bdf39793
-router.get('/threads/:id', requireToken, (req, res, next) => {
+router.get('/threads/:id', (req, res, next) => {
   // req.params.id will be set based on the `:id` in the route
   Thread.findById(req.params.id)
+    .populate('owner')
+    .populate('comments.owner')
     .then(handle404)
     // if `findById` is succesful, respond with 200 and "thread" JSON
     .then(thread => res.status(200).json({ thread: thread.toObject() }))
@@ -70,6 +75,7 @@ router.post('/threads', requireToken, (req, res, next) => {
   req.body.thread.owner = req.user.id
 
   Thread.create(req.body.thread)
+    .populate('owner')
     // respond to succesful `create` with status 201 and JSON of new "thread"
     .then(thread => {
       res.status(201).json({ thread: thread.toObject() })
