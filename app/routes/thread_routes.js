@@ -27,8 +27,8 @@ const requireToken = passport.authenticate('bearer', { session: false })
 // instantiate a router (mini app that only handles routes)
 const router = express.Router()
 
-// INDEX
-router.get('/show-all-thread', (req, res, next) => {
+// GET all without requireToken to get access to db on browser
+router.get('/all-thread', (req, res, next) => {
   Thread.find()
     .populate('owner')
     .populate('comments.owner')
@@ -39,7 +39,7 @@ router.get('/show-all-thread', (req, res, next) => {
 // INDEX
 // GET /threads
 router.get('/threads', requireToken, (req, res, next) => {
-  Thread.find({ owner: req.params.id })
+  Thread.find()
     .populate('owner')
     .populate('comments.owner')
     .then(threads => {
@@ -75,7 +75,6 @@ router.post('/threads', requireToken, (req, res, next) => {
   req.body.thread.owner = req.user.id
 
   Thread.create(req.body.thread)
-    .populate('owner')
     // respond to succesful `create` with status 201 and JSON of new "thread"
     .then(thread => {
       res.status(201).json({ thread: thread.toObject() })
@@ -90,7 +89,7 @@ router.post('/threads', requireToken, (req, res, next) => {
 // PATCH /threads/5a7db6c74d55bc51bdf39793
 router.patch('/threads/:id', requireToken, removeBlanks, (req, res, next) => {
   // if the client attempts to change the `owner` property by including a new
-  // owner, prevent that by deleting that key/value pair
+  // owner, prevent that by deleting that key/value pair]
   delete req.body.thread.owner
 
   Thread.findById(req.params.id)

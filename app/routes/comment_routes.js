@@ -57,16 +57,20 @@ router.patch('/comments/:id', requireToken, removeBlanks, (req, res, next) => {
   // if the client attempts to change the `owner` property by including a new
   // owner, prevent that by deleting that key/value pair
   delete req.body.comment.owner
+  const id = req.params.id
+  const commentData = req.body.comment
 
-  Thread.findById(req.params.id)
+  Thread.findById(req.body.comment.threadId)
     .then(handle404)
-    .then(comment => {
+    .then(thread => {
+      const comment = thread.comments.id(id)
+
       // pass the `req` object and the Mongoose record to `requireOwnership`
       // it will throw an error if the current user isn't the owner
       requireOwnership(req, comment)
 
-      // pass the result of Mongoose's `.update` to the next `.then`
-      return comment.updateOne(req.body.comment)
+      comment.set(commentData)
+      return thread.save()
     })
     // if that succeeded, return 204 and no JSON
     .then(() => res.sendStatus(204))
@@ -77,13 +81,18 @@ router.patch('/comments/:id', requireToken, removeBlanks, (req, res, next) => {
 // DESTROY
 // DELETE /comments/5a7db6c74d55bc51bdf39793
 router.delete('/comments/:id', requireToken, (req, res, next) => {
-  Thread.findById(req.params.id)
+  const id = req.params.id
+
+  Thread.findById(req.body.threadId)
     .then(handle404)
-    .then(comment => {
+    .then(thread => {
+      const comment = thread.comments.id(id)
+
       // throw an error if current user doesn't own `comment`
       requireOwnership(req, comment)
       // delete the comment ONLY IF the above didn't throw
-      comment.deleteOne()
+      comment.remove()
+      thread.save()
     })
     // send back 204 and no content if the deletion succeeded
     .then(() => res.sendStatus(204))
