@@ -27,15 +27,6 @@ const requireToken = passport.authenticate('bearer', { session: false })
 // instantiate a router (mini app that only handles routes)
 const router = express.Router()
 
-// GET all without requireToken to get access to db on browser
-router.get('/all-thread', (req, res, next) => {
-  Thread.find()
-    .populate('owner')
-    .populate('comments.owner')
-    .then(threads => res.status(201).json({ threads }))
-    .catch(next)
-})
-
 // INDEX
 // GET /threads
 router.get('/threads', requireToken, (req, res, next) => {

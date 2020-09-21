@@ -8,7 +8,7 @@ curl "${API}${URL_PATH}/${ID}" \
   --request DELETE \
   --header "Authorization: Bearer ${TOKEN}" \
   --data '{
-     "threadId": "'"${tID}"'"
+     "threadId": "'"${THREADID}"'"
   }'
 
 echo
